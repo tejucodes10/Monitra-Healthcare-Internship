@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ECG Live Graph</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 50px;
+    }
+    canvas {
+      border: 1px solid #ccc;
+    }
+
+    .download-button {
+      display: inline-block;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      text-align: center;
+      text-decoration: none;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="data.js"></script>
+  <script src="drawGraph.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+  <div id="app">
+    <h1>Live Graph for {{ selectedValue }}</h1>
+    <v-app>
+      <v-container>
+        <v-row justify="center">
+          <v-col cols="12">
+            <v-card>
+              <div id="graphContainer">
+                <canvas id="graphCanvas" width="1120" height="224"></canvas>
+                <div id="timestampBox"></div>
+              </div>
+              <v-card-title>
+                Choose a Rental ID
+              </v-card-title>
+              <v-card-text>
+                <v-container>
+                  <v-row>
+                    <v-col cols="12">
+                      <v-select
+                        v-model="selectedValue"
+                        :items="options"
+                        label="Select a value"
+                        @change="drawLiveGraph(selectedValue)"
+                      ></v-select>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
+                      <v-divider></v-divider>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn color="primary" @click="downloadCSV">Download CSV</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-app>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data() {
+        return {
+          selectedValue: '',
+          options: ['503196', '503191', '503190'], // Replace with your own options
+          ecgData: null // Initialize ecgData to null
+        };
+      },
+      methods: {
+        drawLiveGraph(iRentalIDStr) {
+          let iRentalID = parseInt(iRentalIDStr);
+
+          // Remove previous graph canvas
+          d3.select('#graphCanvas').remove();
+
+          // Create a new graph canvas
+          d3.select("#graphContainer")
+            .append("canvas")
+            .attr("id", "graphCanvas")
+            .attr("width", "1120")
+            .attr("height", "224");
+
+          // Check if ECG data is already fetched
+          if (this.ecgData === null || this.ecgData.RentalID !== iRentalID) {
+            // Fetch ECG data for the selected Rental ID
+            this.ecgData = ECGData(iRentalID);
+          }
+
+          // Draw the new graph using the fetched ECG data
+          drawGraph(iRentalID);
+
+          // Return the selected Rental ID
+          return iRentalIDStr;
+        },
+        downloadCSV() {
+  const selectedRentalID = this.selectedValue;
+  const data = this.ecgData;
+
+  // Check if ECG data is available
+  if (data !== null) {
+    // Convert JSON data to CSV format
+    let csvContent = "Date,Time,Voltage,PosixMs\n";
+    for (let i = 0; i < data.Count; i++) {
+      const timestamp = new Date(data.Items[i].PosixMs).toLocaleString();
+      const voltage = data.Items[i].ECGValue;
+      const posixMs = data.Items[i].PosixMs;
+      csvContent += `${timestamp},${voltage},${posixMs}\n`;
+    }
+
+    // Create a download link for the CSV file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `rental_${selectedRentalID}_data.csv`;
+
+    // Simulate a click on the download link to start the download
+    link.click();
+  }
+}
+
+      }
+    });
+  </script>
+</body>
+</html>

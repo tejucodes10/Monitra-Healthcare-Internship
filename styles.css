@@ -1,0 +1,49 @@
+/* styles.css */
+
+/* Media query for mobile devices in portrait orientation */
+@media (max-width: 600px) and (orientation: portrait) {
+    #graphCanvas {
+      width: 260px; /* Mobile portrait width */
+      height: 300px; /* Mobile portrait height */
+    }
+  }
+  
+  /* Media query for mobile devices in landscape orientation */
+  @media (max-width: 600px) and (orientation: landscape) {
+    #graphCanvas {
+      width: 400px; /* Mobile landscape width */
+      height: 200px; /* Mobile landscape height */
+    }
+  }
+  
+  /* Media query for tablets in portrait orientation */
+  @media (min-width: 601px) and (max-width: 1024px) and (orientation: portrait) {
+    #graphCanvas {
+      width: 300px; /* Tablet portrait width */
+      height: 400px; /* Tablet portrait height */
+    }
+  }
+  
+  /* Media query for tablets in landscape orientation */
+  @media (min-width: 601px) and (max-width: 1024px) and (orientation: landscape) {
+    #graphCanvas {
+      width: 600px; /* Tablet landscape width */
+      height: 300px; /* Tablet landscape height */
+    }
+  }
+  
+  /* Media query for desktop devices */
+  @media (min-width: 1025px) {
+    #graphCanvas {
+      width: 1120px; /* Desktop width */
+      height: 224px; /* Desktop height */
+    }
+  }
+  #timestampBox {
+      width: 100%;
+      height: 50px;
+      background-color: #f2f2f2;
+      text-align: center;
+      padding: 10px;
+      font-size: 18px;
+    }
